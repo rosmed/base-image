@@ -206,7 +206,8 @@ RUN \
 # NVIDIA VAAPI (install build-only deps here, cleaned up after Selkies)
 RUN \
     set -euo pipefail && \
-    apt-get update && apt-get install --no-install-recommends -y \
+    add-apt-repository universe -y && \
+    apt-get update && apt-get install --no-install-recommends --fix-missing -y \
         meson pkg-config libc6-dev libegl-dev libglvnd-dev libva-dev \
         libopenh264-dev libvpx-dev libvulkan-dev libwayland-dev \
         libxrandr-dev libgstreamer-plugins-bad1.0-dev libffmpeg-nvenc-dev \
@@ -496,5 +497,6 @@ ENV XMODIFIERS="@im=fcitx"
 
 USER root
 
-# Defend against environment clashes when syncing to volume
-RUN env-hash > /.env_hash
+
+
+
