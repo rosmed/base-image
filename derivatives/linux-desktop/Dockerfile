@@ -422,35 +422,47 @@ RUN \
     update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
 
 # Blender - version passed via build arg, or auto-detected if empty
+# Set INSTALL_BLENDER=false to skip (used by slim variant)
 ARG BLENDER_VERSION=""
+ARG INSTALL_BLENDER=true
 RUN \
     set -euo pipefail && \
-    if [ -z "$BLENDER_VERSION" ]; then \
-        MAJOR_MINOR=$(curl -fsSL "https://download.blender.org/release/" | \
-            grep -oP 'Blender\K\d+\.\d+' | sort -V | tail -1) && \
-        BLENDER_VERSION=$(curl -fsSL "https://download.blender.org/release/Blender${MAJOR_MINOR}/" | \
-            grep -oP "blender-\K${MAJOR_MINOR}\.\d+" | sort -V | tail -1); \
-    fi && \
-    echo "Installing Blender version: ${BLENDER_VERSION}" && \
-    cd /opt && \
-    wget "https://download.blender.org/release/Blender${BLENDER_VERSION%.*}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" && \
-    tar xvf "blender-${BLENDER_VERSION}-linux-x64.tar.xz" && \
-    rm "blender-${BLENDER_VERSION}-linux-x64.tar.xz" && \
-    ln -s "/opt/blender-${BLENDER_VERSION}-linux-x64/blender" /usr/bin/blender && \
-    cp "/opt/blender-${BLENDER_VERSION}-linux-x64/blender.desktop" /usr/share/applications && \
-    cp "/opt/blender-${BLENDER_VERSION}-linux-x64/blender.svg" /usr/share/icons/hicolor/scalable/apps/
+    if [ "$INSTALL_BLENDER" = "true" ]; then \
+        if [ -z "$BLENDER_VERSION" ]; then \
+            MAJOR_MINOR=$(curl -fsSL "https://download.blender.org/release/" | \
+                grep -oP 'Blender\K\d+\.\d+' | sort -V | tail -1) && \
+            BLENDER_VERSION=$(curl -fsSL "https://download.blender.org/release/Blender${MAJOR_MINOR}/" | \
+                grep -oP "blender-\K${MAJOR_MINOR}\.\d+" | sort -V | tail -1); \
+        fi && \
+        echo "Installing Blender version: ${BLENDER_VERSION}" && \
+        cd /opt && \
+        wget "https://download.blender.org/release/Blender${BLENDER_VERSION%.*}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" && \
+        tar xvf "blender-${BLENDER_VERSION}-linux-x64.tar.xz" && \
+        rm "blender-${BLENDER_VERSION}-linux-x64.tar.xz" && \
+        ln -s "/opt/blender-${BLENDER_VERSION}-linux-x64/blender" /usr/bin/blender && \
+        cp "/opt/blender-${BLENDER_VERSION}-linux-x64/blender.desktop" /usr/share/applications && \
+        cp "/opt/blender-${BLENDER_VERSION}-linux-x64/blender.svg" /usr/share/icons/hicolor/scalable/apps/; \
+    else \
+        echo "Skipping Blender installation (INSTALL_BLENDER=false)"; \
+    fi
 
 
 # GPU benchmarks
+# Set INSTALL_GPU_BENCHMARKS=false to skip (used by slim variant)
+ARG INSTALL_GPU_BENCHMARKS=true
 RUN \
     set -euo pipefail && \
-    apt-get update && apt-get install --no-install-recommends -y glmark2 && \
-    cd /tmp && \
-    wget -O Unigine_Heaven-4.0.run https://assets.unigine.com/d/Unigine_Heaven-4.0.run && \
-    chmod +x Unigine_Heaven-4.0.run && \
-    ./Unigine_Heaven-4.0.run --target /opt/unigine-heaven --noexec && \
-    ln -s /opt/unigine-heaven/heaven /usr/local/bin/heaven && \
-    rm -f /tmp/Unigine_Heaven-4.0.run
+    if [ "$INSTALL_GPU_BENCHMARKS" = "true" ]; then \
+        apt-get update && apt-get install --no-install-recommends -y glmark2 && \
+        cd /tmp && \
+        wget -O Unigine_Heaven-4.0.run https://assets.unigine.com/d/Unigine_Heaven-4.0.run && \
+        chmod +x Unigine_Heaven-4.0.run && \
+        ./Unigine_Heaven-4.0.run --target /opt/unigine-heaven --noexec && \
+        ln -s /opt/unigine-heaven/heaven /usr/local/bin/heaven && \
+        rm -f /tmp/Unigine_Heaven-4.0.run; \
+    else \
+        echo "Skipping GPU benchmarks installation (INSTALL_GPU_BENCHMARKS=false)"; \
+    fi
 
 # Switch to user for simplicity.  We will switch back to root as all Vast.ai instances default to root login anyway
 ENV XDG_RUNTIME_DIR="/run/user/1001"
