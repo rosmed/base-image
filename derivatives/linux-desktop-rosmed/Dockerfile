@@ -1,4 +1,6 @@
 ARG VAST_BASE=rosmed/linux-desktop-slim:cuda-12.9-ubuntu24.04-2026-03-25-slim
+ARG SLICER_MAJOR_VER=5.10
+ARG SLICER_MINOR_VER=0
 
 FROM ${VAST_BASE}
 
@@ -86,14 +88,14 @@ RUN echo "source /opt/ros/jazzy/setup.bash" >> /etc/bash.bashrc
 # Libraries for ISMR 2021 Tutorial
 ################################################################################
 
-WORKDIR /home/user
-RUN mkdir igtl \
-    && cd igtl \
-    && git clone https://github.com/openigtlink/OpenIGTLink \
-    && mkdir OpenIGTLink-build \
-    && cd OpenIGTLink-build \
-    && cmake -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_EXAMPLES:BOOL=ON ../OpenIGTLink \
-    && make
+#WORKDIR /home/user
+#RUN mkdir igtl \
+#    && cd igtl \
+#    && git clone https://github.com/openigtlink/OpenIGTLink \
+#    && mkdir OpenIGTLink-build \
+#    && cd OpenIGTLink-build \
+#    && cmake -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_EXAMPLES:BOOL=ON ../OpenIGTLink \
+#    && make
 
 #
 # Prerequisite for 3D Slicer
@@ -123,7 +125,7 @@ WORKDIR /home/user
 #
 RUN mkdir /home/user/slicer \
     && cd /home/user/slicer \
-    && git clone --branch v5.8.1 https://github.com/slicer/Slicer \
+    && git clone --branch v${SLICER_MAJOR_VER}.${SLICER_MINOR_VER} https://github.com/slicer/Slicer \
     && mkdir Slicer-SuperBuild-Release \
     && cd Slicer-SuperBuild-Release \
     && cmake -DCMAKE_BUILD_TYPE:STRING=Release -DSlicer_USE_SYSTEM_OpenSSL=ON ../Slicer \
@@ -289,4 +291,4 @@ WORKDIR /home/user
 RUN cd /home/user \
     && chmod 755 start-slicer-ros2.bash
 
-RUN /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/install-extension.py'
+#RUN /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/install-extension.py'

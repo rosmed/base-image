@@ -71,7 +71,7 @@ execute_command(slicer_bin, f'tar zxf {slicer_tgz}')
 # add some files
 execute_command(slicer_bin, f'cp vtkSlicerROS2Module*.txt {slicer_dir}')
 
-module_subdir = 'lib/Slicer-5.8/qt-loadable-modules'
+module_subdir = 'lib/Slicer-5.10/qt-loadable-modules'
 execute_command(slicer_bin, f'cp {module_subdir}/*ROS2* {slicer_dir}/{module_subdir}')
 
 # cleanup
