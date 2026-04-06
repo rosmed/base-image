@@ -284,9 +284,11 @@ WORKDIR /home/user
 COPY slicer/install-extension.py /home/user/slicer
 COPY slicer/install-module.py /home/user/slicer
 COPY slicer/start-slicer-ros2.bash /home/user
+COPY slicer/setup-slicer.bash /home/user
 
 WORKDIR /home/user
 RUN cd /home/user \
-    && chmod 755 start-slicer-ros2.bash
+    && chmod 755 start-slicer-ros2.bash \
+    && chmod 755 setup-slicer.bash
 
 #RUN /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/install-extension.py'
