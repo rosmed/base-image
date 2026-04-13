@@ -1,4 +1,4 @@
-ARG VAST_BASE=rosmed/linux-desktop-slim:cuda-12.9-ubuntu24.04-2026-03-25-slim
+ARG VAST_BASE=rosmed/linux-desktop-slim:cuda-12.9-ubuntu24.04-2026-03-01-slim
 
 FROM ${VAST_BASE}
 
@@ -8,6 +8,14 @@ LABEL org.opencontainers.image.description="Linux desktop container image with R
 LABEL maintainer="Vast.ai Inc <contact@vast.ai>"
 
 WORKDIR /home/user
+
+#
+# Install CUDA toolkit
+#
+
+USER root
+RUN apt-get update && apt install -y cuda-toolkit-12-9
+
 
 ################################################################################
 # Install ROS 2 Jazzy Jalisco
@@ -200,6 +208,62 @@ RUN mkdir -p /home/user/slicer/modules \
     && make -j4
 
 
+#
+# SlicerNNInteractive
+#
+RUN mkdir -p /home/user/slicer/modules \
+    && cd /home/user/slicer/modules \
+    && git clone https://github.com/coendevente/SlicerNNInteractive \
+    && mkdir SlicerNNInteractive-build \
+    && cd SlicerNNInteractive-build \
+    && cmake -DCMAKE_BUILD_TYPE:STRING=Release -DSlicer_DIR:PATH=/home/user/slicer/Slicer-SuperBuild-Release/Slicer-build ../SlicerNNInteractive \
+    && make -j4
+
+#
+# SlicerNNUnet
+#
+RUN mkdir -p /home/user/slicer/modules \
+    && cd /home/user/slicer/modules \
+    && git clone https://github.com/KitwareMedical/SlicerNNUnet \
+    && mkdir SlicerNNUnet-build \
+    && cd SlicerNNUnet-build \
+    && cmake -DCMAKE_BUILD_TYPE:STRING=Release -DSlicer_DIR:PATH=/home/user/slicer/Slicer-SuperBuild-Release/Slicer-build ../SlicerNNUnet \
+    && make -j4
+
+#
+# SlicerPyTorch
+#
+RUN mkdir -p /home/user/slicer/modules \
+    && cd /home/user/slicer/modules \
+    && git clone https://github.com/fepegar/SlicerPyTorch \
+    && mkdir SlicerPyTorch-build \
+    && cd SlicerPyTorch-build \
+    && cmake -DCMAKE_BUILD_TYPE:STRING=Release -DSlicer_DIR:PATH=/home/user/slicer/Slicer-SuperBuild-Release/Slicer-build ../SlicerPyTorch \
+    && make -j4
+
+#
+# SlicerPythonTestRunner
+#
+RUN mkdir -p /home/user/slicer/modules \
+    && cd /home/user/slicer/modules \
+    && git clone https://github.com/KitwareMedical/SlicerPythonTestRunner \
+    && mkdir SlicerPythonTestRunner-build \
+    && cd SlicerPythonTestRunner-build \
+    && cmake -DCMAKE_BUILD_TYPE:STRING=Release -DSlicer_DIR:PATH=/home/user/slicer/Slicer-SuperBuild-Release/Slicer-build ../SlicerPythonTestRunner \
+    && make -j4
+
+#
+# SlicerTotalSegmentator
+#
+RUN mkdir -p /home/user/slicer/modules \
+    && cd /home/user/slicer/modules \
+    && git clone https://github.com/lassoan/SlicerTotalSegmentator \
+    && mkdir SlicerTotalSegmentator-build \
+    && cd SlicerTotalSegmentator-build \
+    && cmake -DCMAKE_BUILD_TYPE:STRING=Release -DSlicer_DIR:PATH=/home/user/slicer/Slicer-SuperBuild-Release/Slicer-build ../SlicerTotalSegmentator \
+    && make -j4
+
+
 ################################################################################
 # Build packages
 ################################################################################
@@ -207,13 +271,13 @@ RUN mkdir -p /home/user/slicer/modules \
 WORKDIR /home/user
 USER user
 
-#
-# Slicer Package
-#
-RUN cd /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build \
-    && make package \
-    && mkdir -p /home/user/slicer/packages \
-    && mv _CPack_Packages/linux-amd64/TGZ/Slicer*.tar.gz /home/user/slicer/packages
+##
+## Slicer Package
+##
+#RUN cd /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build \
+#    && make package \
+#    && mkdir -p /home/user/slicer/packages \
+#    && mv _CPack_Packages/linux-amd64/TGZ/Slicer*.tar.gz /home/user/slicer/packages
 
 #
 # SlicerOpenIGTLink
@@ -255,6 +319,51 @@ RUN cd /home/user/slicer/modules \
     && mv *.tar.gz /home/user/slicer/packages
 
 #
+# SlicerNNInteractive
+#
+RUN cd /home/user/slicer/modules \
+    && cd SlicerNNInteractive-build \
+    && make package \
+    && mkdir -p /home/user/slicer/packages \
+    && mv *.tar.gz /home/user/slicer/packages
+
+#
+# SlicerNNUnet
+#
+RUN cd /home/user/slicer/modules \
+    && cd SlicerNNUnet-build \
+    && make package \
+    && mkdir -p /home/user/slicer/packages \
+    && mv *.tar.gz /home/user/slicer/packages
+
+#
+# SlicerPyTorch
+#
+RUN cd /home/user/slicer/modules \
+    && cd SlicerPyTorch-build \
+    && make package \
+    && mkdir -p /home/user/slicer/packages \
+    && mv *.tar.gz /home/user/slicer/packages
+
+#
+# SlicerPythonTestRunner
+#
+RUN cd /home/user/slicer/modules \
+    && cd SlicerPythonTestRunner-build \
+    && make package \
+    && mkdir -p /home/user/slicer/packages \
+    && mv *.tar.gz /home/user/slicer/packages
+
+#
+# SlicerTotalSegmentator
+#
+RUN cd /home/user/slicer/modules \
+    && cd SlicerTotalSegmentator-build \
+    && make package \
+    && mkdir -p /home/user/slicer/packages \
+    && mv *.tar.gz /home/user/slicer/packages
+
+#
 # Build SlicerROS2
 #
 RUN mkdir -p /home/user/ros2_ws/src \
@@ -274,21 +383,44 @@ RUN mkdir -p /home/user/slicer/ \
     && /bin/bash -c 'source /opt/ros/jazzy/setup.sh; python3 /home/user/ros2_ws/src/slicer_ros2_module/do-release.py -b /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build -v 1.0'
 
 
-##
-## Install 3D Slicer Extensions
-##
+#
+# Install 3D Slicer Extensions
+#
 WORKDIR /home/user
 USER user
 COPY slicer/install-extension.py /home/user/slicer
 COPY slicer/install-module.py /home/user/slicer
+COPY slicer/update-slicer-pytorch.py /home/user/slicer
 COPY slicer/start-slicer-ros2.bash /home/user
 COPY slicer/setup-slicer.bash /home/user
+COPY slicer/update-slicer-pytorch.bash /home/user
 
 WORKDIR /home/user
 USER root
 RUN cd /home/user \
+    && chown user slicer/install-extension.py \
+    && chown user slicer/install-module.py \
+    && chown user slicer/update-slicer-pytorch.py \
+    && chown user start-slicer-ros2.bash \
+    && chown user setup-slicer.bash \
+    && chown user update-slicer-pytorch.bash
+
+USER user
+RUN cd /home/user \
     && chmod 755 start-slicer-ros2.bash \
-    && chmod 755 setup-slicer.bash
+    && chmod 755 setup-slicer.bash \
+    && chmod 755 update-slicer-pytorch.bash
 
 USER user
 RUN sudo -u user /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/install-extension.py; exit 0'
+RUN sudo -u user /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/update-slicer-pytorch; exit 0'
+
+#
+# Install nnInteractive server
+#
+# NOTE: "nnunetv2<2.7" option is added as the current nninteractive-slicer-server is not compatible with the latest API. (April 9, 2026)
+#
+
+#WORKDIR /home/user
+#USER user
+#RUN /bin/bash -c 'source /home/user/.bashrc; uv pip install nninteractive-slicer-server "nnunetv2<2.7"; echo "export LD_LIBRARY_PATH=/venv/main/lib/python3.12/site-packages/nvidia/cudnn/lib:$LD_LIBRARY_PATH" >> /home/user/.bashrc'
