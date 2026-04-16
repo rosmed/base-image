@@ -413,7 +413,13 @@ RUN cd /home/user \
 
 USER user
 RUN sudo -u user /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/install-extension.py; exit 0'
-RUN sudo -u user /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/update-slicer-pytorch; exit 0'
+RUN sudo -u user /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_DIR=/home/user/slicer/packages; xvfb-run --auto-servernum /home/user/slicer/Slicer-SuperBuild-Release/Slicer-build/Slicer --no-main-window --no-splash --python-script /home/user/slicer/update-slicer-pytorch.py; exit 0'
+
+
+# Additional python packages
+USER root
+RUN pip install numpy \
+    && pip install catkin_pkg
 
 #
 # Install nnInteractive server

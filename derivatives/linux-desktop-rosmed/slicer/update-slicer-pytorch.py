@@ -8,3 +8,5 @@ slicer.util.pip_install("--pre torch torchvision torchaudio --index-url https://
 import torch
 print(torch.cuda.is_available())
 print(torch.version.cuda) # Should show 12.9
+
+exit()
