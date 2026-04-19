@@ -1,4 +1,4 @@
-ARG VAST_BASE=rosmed/linux-desktop-slim:cuda-12.9-ubuntu24.04-2026-03-01-slim
+ARG VAST_BASE=rosmed/linux-desktop-slim:cuda-12.9-ubuntu24.04-2026-04-10-slim
 
 FROM ${VAST_BASE}
 
@@ -8,6 +8,9 @@ LABEL org.opencontainers.image.description="Linux desktop container image with R
 LABEL maintainer="Vast.ai Inc <contact@vast.ai>"
 
 WORKDIR /home/user
+
+USER root
+RUN apt-get update && apt-get dist-upgrade -y
 
 #
 # Install CUDA toolkit
@@ -84,7 +87,9 @@ RUN apt-get update \
         ros-jazzy-object-recognition-msgs \
         ros-jazzy-moveit \
         ros-jazzy-ros-gz \
+        ros-jazzy-ur \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 #
 # Source ROS 2 setup in bash sessions
@@ -370,7 +375,7 @@ RUN mkdir -p /home/user/ros2_ws/src \
     && cd /home/user/ros2_ws/src \
     #&& git clone https://github.com/jhu-cisst/ros2_cisst_msgs.git cisst_msgs \ # Installed as part of dVRK/ciasst
     && git clone https://github.com/jhu-saw/ros2_sensable_omni_model \
-    && git clone https://github.com/rosmed/slicer_ros2_module \
+    && git clone -b feature-robot-control https://github.com/rosmed/slicer_ros2_module \
     && cd /home/user/ros2_ws \
     && /bin/bash -c 'source /opt/ros/jazzy/setup.sh; colcon build --cmake-args -DSlicer_DIR:PATH=/home/user/slicer/Slicer-SuperBuild-Release/Slicer-build -DCMAKE_BUILD_TYPE=Release'
 
