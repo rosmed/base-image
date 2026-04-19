@@ -406,13 +406,13 @@ RUN cd /home/user \
     && chown user slicer/install-extension.py \
     && chown user slicer/install-module.py \
     && chown user slicer/update-slicer-pytorch.py \
-    && chown user start-slicer-ros2.bash \
+    #&& chown user start-slicer-ros2.bash \
     && chown user setup-slicer.bash \
     && chown user update-slicer-pytorch.bash
 
 USER user
 RUN cd /home/user \
-    && chmod 755 start-slicer-ros2.bash \
+    #&& chmod 755 start-slicer-ros2.bash \
     && chmod 755 setup-slicer.bash \
     && chmod 755 update-slicer-pytorch.bash
 
@@ -425,6 +425,12 @@ RUN sudo -u user /bin/bash -c 'source /opt/ros/jazzy/setup.sh; export EXTENSION_
 USER root
 RUN pip install numpy \
     && pip install catkin_pkg
+
+# Add NVIDIA python library path to LD_LIBRARY_PATH
+WORKDIR /home/user
+USER user
+RUN /bin/bash -c 'echo "source /opt/ros/jazzy/setup.bash; SLICER_NV_LIB_PATH=/home/user/slicer/Slicer-SuperBuild-Release/python-install/lib/python3.12/site-packages/nvidia; export LD_LIBRARY_PATH=$SLICER_NV_LIB_PATH/cudnn/lib:$SLICER_NV_LIB_PATH/cublas/lib:$LD_LIBRARY_PATH" >> /home/user/.bashrc'
+
 
 #
 # Install nnInteractive server
