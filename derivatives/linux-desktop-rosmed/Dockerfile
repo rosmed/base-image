@@ -396,7 +396,7 @@ USER user
 COPY slicer/install-extension.py /home/user/slicer
 COPY slicer/install-module.py /home/user/slicer
 COPY slicer/update-slicer-pytorch.py /home/user/slicer
-COPY slicer/start-slicer-ros2.bash /home/user
+#COPY slicer/start-slicer-ros2.bash /home/user
 COPY slicer/setup-slicer.bash /home/user
 COPY slicer/update-slicer-pytorch.bash /home/user
 
@@ -429,7 +429,7 @@ RUN pip install numpy \
 # Add NVIDIA python library path to LD_LIBRARY_PATH
 WORKDIR /home/user
 USER user
-RUN /bin/bash -c 'echo "source /opt/ros/jazzy/setup.bash; SLICER_NV_LIB_PATH=/home/user/slicer/Slicer-SuperBuild-Release/python-install/lib/python3.12/site-packages/nvidia; export LD_LIBRARY_PATH=$SLICER_NV_LIB_PATH/cudnn/lib:$SLICER_NV_LIB_PATH/cublas/lib:$LD_LIBRARY_PATH" >> /home/user/.bashrc'
+RUN /bin/bash -c 'echo "SLICER_NV_LIB_PATH=/home/user/slicer/Slicer-SuperBuild-Release/python-install/lib/python3.12/site-packages/nvidia; export LD_LIBRARY_PATH=\$SLICER_NV_LIB_PATH/cudnn/lib:\$SLICER_NV_LIB_PATH/cublas/lib:\$LD_LIBRARY_PATH" >> /home/user/.bashrc'
 
 
 #
